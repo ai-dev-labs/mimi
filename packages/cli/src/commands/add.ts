@@ -5,6 +5,7 @@ import chalk from "chalk";
 import path from "path";
 import { spawn } from "child_process";
 import { loadConfig, getDataDir } from "../config";
+import { getProjectMetadata } from "../lib/utils/paths";
 import { PipelineEngine, Repository, setDataDir } from "@ai-dev-labs/mimi-sdk";
 
 export const addCommand = new Command("add")
@@ -36,8 +37,11 @@ export const addCommand = new Command("add")
       }
 
       // 3. Prepare Metadata
+      const projectMeta = getProjectMetadata();
       const metadata: any = {};
-      if (options.project) metadata.project = options.project;
+      if (options.project || projectMeta.project) {
+        metadata.project = options.project || projectMeta.project;
+      }
       if (options.userid) metadata.userId = options.userid;
 
       const engine = new PipelineEngine(config);

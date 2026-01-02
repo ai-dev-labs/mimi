@@ -2,6 +2,7 @@ import { Command } from "commander";
 import ora from "ora";
 import chalk from "chalk";
 import { loadConfig, getDataDir } from "../config";
+import { getProjectMetadata } from "../lib/utils/paths";
 import { SearchEngine, setDataDir } from "@ai-dev-labs/mimi-sdk";
 
 export const queryCommand = new Command("query")
@@ -18,8 +19,11 @@ export const queryCommand = new Command("query")
       setDataDir(getDataDir());
       const engine = new SearchEngine(config);
 
+      const projectMeta = getProjectMetadata();
       const filters: any = {};
-      if (options.project) filters.project = options.project;
+      if (options.project || projectMeta.project) {
+        filters.project = options.project || projectMeta.project;
+      }
       if (options.userid) filters.userId = options.userid;
 
       const results = await engine.search(phrase, filters, options.entity);
