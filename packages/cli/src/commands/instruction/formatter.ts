@@ -42,7 +42,7 @@ export function formatInstruction(options: InstructionOptions): string {
         },
       },
       null,
-      2
+      2,
     );
   }
   return AGENT_INSTRUCTION;

@@ -18,6 +18,8 @@ describe("instructionAction", () => {
     const output = JSON.parse(logSpy.mock.calls[0][0]);
     expect(output).toHaveProperty("hookSpecificOutput");
     expect(output.hookSpecificOutput).toHaveProperty("additionalContext");
-    expect(output.hookSpecificOutput.additionalContext).toContain("Required Agent Memory Protocol");
+    expect(output.hookSpecificOutput.additionalContext).toContain(
+      "Required Agent Memory Protocol",
+    );
   });
 });
