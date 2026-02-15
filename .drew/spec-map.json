@@ -904,11 +904,11 @@
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
       "start_byte": 215,
-      "end_byte": 5174,
+      "end_byte": 5188,
       "start_line": 7,
-      "end_line": 160,
-      "checksum": "222fc4b26d2d73d8660ab4f1be3a0184f152dfe1575e8f576ecabc57634b0f35",
-      "summary": "The Repository class handles data persistence and retrieval for memories and entities. It provides methods to save batches of memories and entities, perform vector searches on memories, retrieve all memories, get a memory by its ID, delete memories, and update existing memories. It interacts with a database (presumably LanceDB via getDb()) to perform these operations."
+      "end_line": 162,
+      "checksum": "5ca393666ae891b88ed7cfc876cbdea43c8d6b4f4eda4f905054df46da158897",
+      "summary": "A database abstraction layer that manages the persistence and retrieval of vector-embedded memory and entity records. It handles batch inserts, table initialization, and CRUD operations while managing the serialization of metadata and entity associations."
     },
     "packages/sdk/src/storage/repository.ts:saveBatch": {
       "id": "packages/sdk/src/storage/repository.ts:saveBatch",
@@ -930,11 +930,11 @@
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
       "start_byte": 1881,
-      "end_byte": 2742,
+      "end_byte": 2756,
       "start_line": 59,
-      "end_line": 85,
-      "checksum": "8fcf121c904db78ca1fdacec5ae382ee93f7eee6f908379faac7f008003aba61",
-      "summary": "The searchMemories method performs a vector-based similarity search on memory records stored in the database. It takes a query vector, an optional SQL-like filter string, and a limit for the number of results. It returns an array of memory objects, parsing metadata and entityIds if they are stored as JSON strings."
+      "end_line": 87,
+      "checksum": "1416ed4ed7811d89d583422c165c7eb9f0d1779e043cc2d23109758b9337b78a",
+      "summary": "Executes a vector-based similarity search on the memory table using cosine distance and optional SQL-like filtering. It parses retrieved stringified JSON fields into objects before returning the limited result set."
     },
     "packages/sdk/src/storage/repository.ts:getAll": {
       "id": "packages/sdk/src/storage/repository.ts:getAll",
@@ -942,10 +942,10 @@
       "name": "getAll",
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
-      "start_byte": 2746,
-      "end_byte": 3302,
-      "start_line": 87,
-      "end_line": 101,
+      "start_byte": 2760,
+      "end_byte": 3316,
+      "start_line": 89,
+      "end_line": 103,
       "checksum": "73c041b82540add3fa4761c479d9bd874dd261740fa54d7b39401b68ee606f0f",
       "summary": "The getAll method retrieves a specified number of the most recent memory records from the repository. It checks if the memory table exists, and if so, queries and returns the memories, ensuring that metadata and entityIds are parsed correctly if stored as JSON strings."
     },
@@ -955,10 +955,10 @@
       "name": "getById",
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
-      "start_byte": 3306,
-      "end_byte": 4015,
-      "start_line": 103,
-      "end_line": 128,
+      "start_byte": 3320,
+      "end_byte": 4029,
+      "start_line": 105,
+      "end_line": 130,
       "checksum": "8e210e2f38f0f1cadf06fe58e55b87727be470a3abef5ac5e3640dcce3bbda71",
       "summary": "Fetches a single memory by its ID from the database. It queries the memory table for a matching ID, parses associated metadata and entity IDs, and returns the memory object or null if not found or the table doesn't exist."
     },
@@ -968,10 +968,10 @@
       "name": "deleteById",
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
-      "start_byte": 4019,
-      "end_byte": 4315,
-      "start_line": 130,
-      "end_line": 138,
+      "start_byte": 4033,
+      "end_byte": 4329,
+      "start_line": 132,
+      "end_line": 140,
       "checksum": "cf4966f2288762574b7de9658799adff2bc738e73b804bb32b4a632900121fd7",
       "summary": "Deletes a memory from the database using its ID. It checks for the existence of the memory table and returns true upon successful deletion, or false if the table is not found."
     },
@@ -981,10 +981,10 @@
       "name": "updateMemory",
       "namespace": [],
       "path": "packages/sdk/src/storage/repository.ts",
-      "start_byte": 4319,
-      "end_byte": 5172,
-      "start_line": 140,
-      "end_line": 159,
+      "start_byte": 4333,
+      "end_byte": 5186,
+      "start_line": 142,
+      "end_line": 161,
       "checksum": "8675a570cbaf3bc16596bc613ff064c7e28d974a2dac284c12e645d4a06215eb",
       "summary": "Updates an existing memory in the database with provided fields. It constructs a formatted update object, ensuring proper escaping of string values, and applies the updates based on the memory's ID. No operation is performed if the memory table does not exist."
     },
@@ -1039,6 +1039,761 @@
       "end_line": 25,
       "checksum": "99aacdae71ccf4b75603636182322266cd20f06943dc02c98bde9227930d50a9",
       "summary": "Represents an entity with an ID, name, type, and an optional description. It can also include a vector representation."
+    }
+  },
+  "specifications": {
+    "REQ-001": {
+      "id": "REQ-001",
+      "description": "When the user executes the project initialization command, the system shall create a 'mimi.toml' configuration file.",
+      "acceptance_criteria": [
+        "The system must attempt to derive the project name from the Git repository root directory name if available.",
+        "The system must fall back to the current directory name if not within a Git repository.",
+        "The system must prevent initialization and return an error if a 'mimi.toml' file already exists.",
+        "The system must write a basic default configuration to the new file upon success."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/init.ts:getGitRepoName",
+        "packages/cli/src/commands/init.ts:initAction"
+      ],
+      "checksum": "da4eee904e7f81e0461a5e3636f2bb89f38b3f2c2495941e09f9033c192266fe"
+    },
+    "REQ-002": {
+      "id": "REQ-002",
+      "description": "When the application is started, the system shall load and validate the configuration settings.",
+      "acceptance_criteria": [
+        "The system must return a default configuration if no configuration file is found.",
+        "The system must parse and validate the JSON configuration file against a predefined schema.",
+        "The system must throw a specific ConfigNotFoundError with a helpful prompt if a required configuration file is missing from a specified path."
+      ],
+      "node_ids": [
+        "packages/cli/src/config/index.ts:ConfigNotFoundError",
+        "packages/cli/src/config/index.ts:constructor",
+        "packages/cli/src/config/index.ts:loadConfig"
+      ],
+      "checksum": "4553e86db5a473a302fb418f037e9a2db0aafc7f939b865fcc52ed5f18085d38"
+    },
+    "REQ-003": {
+      "id": "REQ-003",
+      "description": "While the CLI is running, the system shall manage user feedback through a leveled logging system.",
+      "acceptance_criteria": [
+        "The system shall display debug logs only when the debug mode is explicitly enabled.",
+        "The system shall display error messages to the error stream regardless of the debug mode status.",
+        "The system shall support color-coded output for different log levels including info, warn, and success.",
+        "The system shall provide a mechanism to track and retrieve the current debug state."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/logger.ts:Logger",
+        "packages/cli/src/lib/logger.ts:setDebug",
+        "packages/cli/src/lib/logger.ts:getDebug",
+        "packages/cli/src/lib/logger.ts:log",
+        "packages/cli/src/lib/logger.ts:error"
+      ],
+      "checksum": "f01e86bf1022f8591ec8a77666595b701db5932f402221962fda099b095656b1"
+    },
+    "REQ-004": {
+      "id": "REQ-004",
+      "description": "While the Logger is active, the system shall only display log messages that meet or exceed the minimum configured LogLevel.",
+      "acceptance_criteria": [
+        "Verify setLevel restricts output to specified levels.",
+        "Verify log levels include debug, info, warn, error, and silent.",
+        "Verify Logger supports output to a file."
+      ],
+      "node_ids": [
+        "packages/sdk/src/logger.ts:LogLevel",
+        "packages/sdk/src/logger.ts:Logger",
+        "packages/sdk/src/logger.ts:setLevel"
+      ],
+      "checksum": "8c32020d86d97ea8aecb12598b341f4399dda1af796bd0ed32dad61f5e1662bc"
+    },
+    "REQ-005": {
+      "id": "REQ-005",
+      "description": "When an instruction is requested via the CLI, the system shall format the agent instruction according to specified provider requirements.",
+      "acceptance_criteria": [
+        "The default output is a raw instruction string.",
+        "If the 'gemini' flag is enabled, the instruction is wrapped in a specific JSON structure.",
+        "Formatted output for Gemini is sent directly to stdout without logger prefixes."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/instruction/formatter.ts:InstructionOptions",
+        "packages/cli/src/commands/instruction/formatter.ts:formatInstruction",
+        "packages/cli/src/commands/instruction.ts:instructionAction"
+      ],
+      "checksum": "c8a6071a25a61edb51f6f3c25ca8d96898c50a25afd46435728a919d405d8a62"
+    },
+    "REQ-006": {
+      "id": "REQ-006",
+      "description": "When the list command is executed, the system shall display a collection of recent memory entries.",
+      "acceptance_criteria": [
+        "The output can be limited to a specific number of entries.",
+        "The list supports both human-readable and JSON output formats.",
+        "Metadata within the list is correctly serialized for JSON responses."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/list.ts:listAction"
+      ],
+      "checksum": "d842e724436d41c7b9e60c644a47b4ae57d0dae3cfa7537563f222b68472dd17"
+    },
+    "REQ-007": {
+      "id": "REQ-007",
+      "description": "The system shall support multiple categories of memory including raw, episodic, semantic, and procedural types.",
+      "acceptance_criteria": [
+        "The MemoryType definition includes 'raw', 'episodic', 'semantic', and 'procedural'.",
+        "The Memory interface supports all defined MemoryType values.",
+        "The storage layer correctly handles these type classifications."
+      ],
+      "node_ids": [
+        "packages/sdk/src/types.ts:MemoryType",
+        "packages/sdk/src/types.ts:Memory"
+      ],
+      "checksum": "6fb43ced8440e6076d84339d7be017b75fd10049aa80da4c0a42786d4abd68e5"
+    },
+    "SPEC-001": {
+      "id": "SPEC-001",
+      "description": "The GoogleProvider shall initialize generative and embedding models using a provided API key.",
+      "acceptance_criteria": [
+        "The constructor accepts a valid API key.",
+        "Generative models are successfully instantiated from Google Generative AI.",
+        "Embedding models are successfully instantiated from Google Generative AI."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/google.ts:GoogleProvider",
+        "packages/sdk/src/ai/providers/google.ts:constructor"
+      ],
+      "checksum": "d78d05a681913e2161a71cc51120a20089fb9d185d8cb777490ee3204cf3decf"
+    },
+    "SPEC-002": {
+      "id": "SPEC-002",
+      "description": "If a transient network error or rate limit occurs during a Google API call, then the GoogleProvider shall retry the operation using exponential backoff.",
+      "acceptance_criteria": [
+        "Retries are triggered by network timeouts or rate limit errors.",
+        "The backoff duration increases exponentially between attempts.",
+        "The number of retry attempts is configurable."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/google.ts:withRetry"
+      ],
+      "checksum": "304f420aab54fc840f4c95f67665e9b0ed91672f425ce33a044d218f2c31c6ba"
+    },
+    "SPEC-003": {
+      "id": "SPEC-003",
+      "description": "When a prompt is provided, the GoogleProvider shall generate text content and return it along with token usage metrics.",
+      "acceptance_criteria": [
+        "The output contains the generated string.",
+        "The output contains the count of tokens used.",
+        "The generation process is protected by the internal retry mechanism."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/google.ts:generate"
+      ],
+      "checksum": "4da62e999278c20ef65a1ec5cbf5326cfb368ae7dd57947340705293e5f4720d"
+    },
+    "SPEC-004": {
+      "id": "SPEC-004",
+      "description": "The LocalModelManager shall implement a singleton pattern to ensure the 'Xenova/all-MiniLM-L6-v2' model is loaded into memory only once.",
+      "acceptance_criteria": [
+        "The model is lazily loaded upon the first call to getEmbedder.",
+        "Subsequent calls to getEmbedder return the already loaded model instance.",
+        "The specific 'Xenova/all-MiniLM-L6-v2' pipeline is utilized."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/local.ts:LocalModelManager",
+        "packages/sdk/src/ai/providers/local.ts:getEmbedder"
+      ],
+      "checksum": "a8dce9e7e8e62f41a740e6417b8addf23549b0472c132d6a0ca0bb145ea83b25"
+    },
+    "SPEC-005": {
+      "id": "SPEC-005",
+      "description": "When input text is processed by the AI pipeline, the Engine shall execute all configured steps and generate embeddings for the resulting memories.",
+      "acceptance_criteria": [
+        "Pipeline steps are executed in the configured sequence.",
+        "Embeddings are computed for every memory generated by a pipeline step.",
+        "Extracted entities and final processed memories are returned in the response."
+      ],
+      "node_ids": [
+        "packages/sdk/src/pipeline/engine.ts:runPipelineSteps",
+        "packages/sdk/src/pipeline/engine.ts:process"
+      ],
+      "checksum": "20eda78ba05d691e491cb11e104abaef59168e576f0abcab29eae18b28764fc5"
+    },
+    "REQ-LOG-001": {
+      "id": "REQ-LOG-001",
+      "description": "The logger shall provide a mechanism to configure the directory where log files are stored.",
+      "acceptance_criteria": [
+        "The setLogDir function accepts a string path representing the target directory.",
+        "The system updates the internal configuration for log storage location."
+      ],
+      "node_ids": [
+        "packages/sdk/src/logger.ts:setLogDir"
+      ],
+      "checksum": "0629b3eefb84129375323835a33fba2f1586a2c617cae378a2562b2bb763e323"
+    },
+    "REQ-LOG-002": {
+      "id": "REQ-LOG-002",
+      "description": "While the system is operational, the logger shall filter message output based on the configured severity level.",
+      "acceptance_criteria": [
+        "The debug method only outputs messages when the log level is set to debug.",
+        "The info method outputs messages when the log level is debug or info.",
+        "The warn method outputs messages unless the level is silent or error.",
+        "The error method outputs messages unless the level is silent."
+      ],
+      "node_ids": [
+        "packages/sdk/src/logger.ts:debug",
+        "packages/sdk/src/logger.ts:info",
+        "packages/sdk/src/logger.ts:warn",
+        "packages/sdk/src/logger.ts:error"
+      ],
+      "checksum": "41a7549e6696a39921d37fbbbab873fb014aace5f89e582c4dbdebf21550f38e"
+    },
+    "REQ-PIPE-001": {
+      "id": "REQ-PIPE-001",
+      "description": "When the PipelineEngine is initialized, it shall be configured with an LLMFactory and application settings.",
+      "acceptance_criteria": [
+        "The constructor successfully instantiates the PipelineEngine with valid config objects.",
+        "The LLMFactory is initialized and accessible within the engine instance."
+      ],
+      "node_ids": [
+        "packages/sdk/src/pipeline/engine.ts:PipelineEngine",
+        "packages/sdk/src/pipeline/engine.ts:constructor"
+      ],
+      "checksum": "436c58be0ecf5f9358dacf553ea504cc7aecaaf56cac8f1719ed6f418883f5ab"
+    },
+    "REQ-PIPE-002": {
+      "id": "REQ-PIPE-002",
+      "description": "When raw text input is received, the PipelineEngine shall generate a structured memory object including metadata and vector embeddings.",
+      "acceptance_criteria": [
+        "A unique ID is assigned to every created raw memory.",
+        "A creation timestamp is captured for every memory object.",
+        "The system uses the configured embedder to generate a vector representation of the text."
+      ],
+      "node_ids": [
+        "packages/sdk/src/pipeline/engine.ts:createRawMemory"
+      ],
+      "checksum": "6c63896900bb8360301415f5a84050300aa642d9e69a8ce43c6eac0ea7357e70"
+    },
+    "REQ-PIPE-003": {
+      "id": "REQ-PIPE-003",
+      "description": "When processing a memory, the PipelineEngine shall extract semantic entities using a configured LLM provider.",
+      "acceptance_criteria": [
+        "The system sends memory content to the LLM provider for analysis.",
+        "The LLM response is parsed into individual entity objects.",
+        "Vector embeddings are generated for each extracted entity."
+      ],
+      "node_ids": [
+        "packages/sdk/src/pipeline/engine.ts:extractEntities"
+      ],
+      "checksum": "1c227d118cee512c34dd88cd5decdce89b240f5f3ca9566b9871840e189ca83d"
+    },
+    "REQ-PIPE-004": {
+      "id": "REQ-PIPE-004",
+      "description": "When a pipeline execution completes, the system shall return a ProcessingResult containing all generated artifacts.",
+      "acceptance_criteria": [
+        "The output structure contains a collection of extracted memories.",
+        "The output structure contains a collection of extracted entities."
+      ],
+      "node_ids": [
+        "packages/sdk/src/pipeline/engine.ts:ProcessingResult"
+      ],
+      "checksum": "3b67737507d009e8c97bfe9bac5179abb5d9022feb8096db8818015f64264ccb"
+    },
+    "SPEC-006": {
+      "id": "SPEC-006",
+      "description": "The search engine shall provide SearchResult objects containing the memory ID, content, and a similarity score.",
+      "acceptance_criteria": [
+        "Each result contains a unique memory ID.",
+        "Each result contains a numeric similarity score representing the match quality.",
+        "The structure includes metadata and type fields."
+      ],
+      "node_ids": [
+        "packages/sdk/src/search/engine.ts:SearchResult"
+      ],
+      "checksum": "b762731581d20ced7a796de947d2df3d641095ccd4ce6b27cd909c88d6b44135"
+    },
+    "REQ-CLI-001": {
+      "id": "REQ-CLI-001",
+      "description": "The CLI shall provide consistent access to system-level directory paths for configuration, data, and logs.",
+      "acceptance_criteria": [
+        "getMimiDir shall return the constant base directory for Mimi files.",
+        "getConfigPath shall return the constant path for the Mimi configuration file.",
+        "getDataDir shall return the constant path for the data directory.",
+        "getLogsDir shall return the constant path for log file storage."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/utils/paths.ts:getMimiDir",
+        "packages/cli/src/lib/utils/paths.ts:getConfigPath",
+        "packages/cli/src/lib/utils/paths.ts:getDataDir",
+        "packages/cli/src/lib/utils/paths.ts:getLogsDir"
+      ],
+      "checksum": "854cd200699ad2c1111d75b72d30a7b96ed733b99d5e39f4652c55663b7eb7b9"
+    },
+    "REQ-CLI-002": {
+      "id": "REQ-CLI-002",
+      "description": "When looking for project context, the CLI shall search for a configuration file named 'mimi.toml' from the current directory up to the root.",
+      "acceptance_criteria": [
+        "findProjectConfig shall return an absolute path if 'mimi.toml' exists in the current or any parent directory.",
+        "findProjectConfig shall return null if the root directory is reached without finding the file."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/utils/paths.ts:findProjectConfig"
+      ],
+      "checksum": "535dc0f8644207bc6e9eccadae81f9f917001a5cdb58043ca7f73371b4669ee3"
+    },
+    "REQ-CLI-003": {
+      "id": "REQ-CLI-003",
+      "description": "If a configuration file is successfully located, the CLI shall extract the project name from the file metadata.",
+      "acceptance_criteria": [
+        "getProjectMetadata shall return an object containing the 'project' name string from the config file.",
+        "getProjectMetadata shall return an empty object if the file is missing or the project name is not defined."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/utils/paths.ts:getProjectMetadata"
+      ],
+      "checksum": "2e211f3c63e2c06384dff66b43660bd6f1ef9bd632f4e31a989091ab8f6f5e4a"
+    },
+    "REQ-SDK-001": {
+      "id": "REQ-SDK-001",
+      "description": "While using the Google AI provider, the system shall generate text embedding vectors with integrated retry logic.",
+      "acceptance_criteria": [
+        "The embed function shall call Google's text-embedding model for a given input string.",
+        "The system shall retry the operation if the initial embedding request fails."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/google.ts:embed"
+      ],
+      "checksum": "cf72fb54bcab07982cf5b59982a4c8e05c625e272cec3ed134aa65b0c2345155"
+    },
+    "REQ-SDK-002": {
+      "id": "REQ-SDK-002",
+      "description": "The system shall provide a local AI provider that implements vector embeddings and mock text generation.",
+      "acceptance_criteria": [
+        "LocalProvider shall implement the ILLMProvider interface.",
+        "The local embed function shall produce a normalized mean-pooled vector using the 'Xenova/all-MiniLM-L6-v2' model.",
+        "The local generate function shall return a mock response or warning for text generation requests.",
+        "The local generate function shall apply a heuristic for entity extraction."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/local.ts:LocalProvider",
+        "packages/sdk/src/ai/providers/local.ts:generate",
+        "packages/sdk/src/ai/providers/local.ts:embed"
+      ],
+      "checksum": "68a2d3926155b8c6cb6b670f609cea84e7d72baad778b5eaf9e48c5a6a6af215"
+    },
+    "REQ-ADD-001": {
+      "id": "REQ-ADD-001",
+      "description": "As a user, I want to add new memory entries to the system.",
+      "acceptance_criteria": [
+        "The system SHALL accept memory input from text.",
+        "The system SHALL accept memory input from files.",
+        "The system SHALL attach project and user IDs as metadata to new memory entries.",
+        "The system SHALL save memory entries to storage.",
+        "The system SHALL be able to process memory entries asynchronously via a background process for pipeline execution.",
+        "The system SHALL log errors that occur during the addition process."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/add.ts:addAction"
+      ],
+      "checksum": "7d8a1c60a7e8ba53735d6cdadbf2cf969746935a01f0d78cadc92a466af67432"
+    },
+    "REQ-DEL-001": {
+      "id": "REQ-DEL-001",
+      "description": "As a user, I want to delete existing memory entries by their ID.",
+      "acceptance_criteria": [
+        "The system SHALL allow deletion of a memory entry using its unique ID.",
+        "The system SHALL log a success message upon successful deletion.",
+        "The system SHALL log an error if the deletion operation fails."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/delete.ts:deleteAction"
+      ],
+      "checksum": "1ccb3cbc94b731f25a3f76d1edf6b93b784eb06ac6025cf760f5e31c294950cf"
+    },
+    "REQ-GET-001": {
+      "id": "REQ-GET-001",
+      "description": "As a user, I want to retrieve and display a specific memory entry by its ID.",
+      "acceptance_criteria": [
+        "The system SHALL retrieve a memory entry using its unique ID.",
+        "The system SHALL display the retrieved memory in a human-readable format.",
+        "The system SHALL display the retrieved memory as a JSON object if requested.",
+        "The system SHALL parse metadata to JSON when outputting the memory as a JSON object.",
+        "The system SHALL log an error and exit if the specified memory entry is not found."
+      ],
+      "node_ids": [
+        "packages/cli/src/commands/get.ts:getAction"
+      ],
+      "checksum": "02a2e5a5e5a1378647b282257d298d53bcfdc303bd6230d2b3ed5e3f973363e1"
+    },
+    "REQ-UI-001": {
+      "id": "REQ-UI-001",
+      "description": "When the system performs long-running operations, it SHALL provide visual feedback to the user.",
+      "acceptance_criteria": [
+        "The system SHALL display a spinner during operations.",
+        "If in debug mode, the system SHALL use a mock spinner to avoid actual spinning."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/logger.ts:spinner"
+      ],
+      "checksum": "c307b81b673e50d10725ba2897d7da9b916e3542d4a357911ac7067d2b9efa22"
+    },
+    "REQ-LLM-001": {
+      "id": "REQ-LLM-001",
+      "description": "The LLMFactory shall initialize using a configuration object to define and manage available Language Model providers.",
+      "acceptance_criteria": [
+        "The factory constructor accepts a configuration object.",
+        "The configuration object determines the setup for specific LLM providers.",
+        "The factory maintains an internal state based on the provided configuration."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/factory.ts:LLMFactory",
+        "packages/sdk/src/ai/factory.ts:constructor"
+      ],
+      "checksum": "5d72c87670eb4df50b4976f0af7fd205422af634df76796aa938eeef30bc78c9"
+    },
+    "REQ-LLM-002": {
+      "id": "REQ-LLM-002",
+      "description": "When a provider is requested by name, the LLMFactory shall return a cached instance or create a new instance if it does not exist.",
+      "acceptance_criteria": [
+        "The system retrieves providers by name (e.g., 'google', 'local').",
+        "The system caches provider instances to prevent redundant instantiation.",
+        "The system instantiates new providers only when they are missing from the cache."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/factory.ts:getProvider"
+      ],
+      "checksum": "97bfe92c0154cef6054929ac3946df45323981e70aee25ee2699cfc18c52b4ee"
+    },
+    "REQ-CONF-001": {
+      "id": "REQ-CONF-001",
+      "description": "The SDK SHALL support a structured configuration.",
+      "acceptance_criteria": [
+        "The system SHALL load its operational parameters from a defined configuration object."
+      ],
+      "node_ids": [
+        "packages/sdk/src/config/schema.ts:Config"
+      ],
+      "checksum": "62ea7f4232913beb15066e171cadf7739d6e91db4ae7a8f097cfdbf511a0d974"
+    },
+    "REQ-SRCH-001": {
+      "id": "REQ-SRCH-001",
+      "description": "The SDK SHALL provide advanced search capabilities using vector embeddings.",
+      "acceptance_criteria": [
+        "The system SHALL initialize the search engine with appropriate configuration, including a data repository and an LLM factory for embedding.",
+        "The system SHALL be able to convert a search query into a vector embedding.",
+        "The system SHALL perform a vector search against a data repository.",
+        "The system SHALL allow filtering search results based on specified criteria.",
+        "The system SHALL support boosting the relevance of results associated with a specific entity.",
+        "The system SHALL sort search results by relevance score.",
+        "The system SHALL return a limited number of top search results."
+      ],
+      "node_ids": [
+        "packages/sdk/src/search/engine.ts:SearchEngine",
+        "packages/sdk/src/search/engine.ts:constructor",
+        "packages/sdk/src/search/engine.ts:search"
+      ],
+      "checksum": "d4a6b578fcd8266b19bc330778bbfa568a219b067b450c48eef952a63c763612"
+    },
+    "REQ-SDK-STORAGE-DB-001": {
+      "id": "REQ-SDK-STORAGE-DB-001",
+      "description": "The system SHALL allow configuring the data storage directory.",
+      "acceptance_criteria": [
+        "When the data directory is set, the system SHALL update the internal database path.",
+        "If the data directory changes, the system SHALL reset any existing database connections to ensure a fresh instance."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/db.ts:setDataDir"
+      ],
+      "checksum": "e1a3966bde411cf3711a7aa37b316f79343c270f48ce62d21cb7ed7a4416f6f6"
+    },
+    "REQ-SDK-STORAGE-DB-002": {
+      "id": "REQ-SDK-STORAGE-DB-002",
+      "description": "The system SHALL manage LanceDB connections.",
+      "acceptance_criteria": [
+        "When a database connection is requested, the system SHALL ensure the specified data directory exists.",
+        "The system SHALL either retrieve an existing LanceDB connection or initialize a new one.",
+        "The system SHALL return a valid LanceDB database instance."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/db.ts:getDb"
+      ],
+      "checksum": "6197d09b612605b1271aab1bef1a724c4c3ab6bf89ace410c83e72179f71217d"
+    },
+    "REQ-SDK-STORAGE-DB-003": {
+      "id": "REQ-SDK-STORAGE-DB-003",
+      "description": "The system SHALL provide a mechanism to query existing database tables.",
+      "acceptance_criteria": [
+        "When requested, the system SHALL list the names of all existing tables within the connected database."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/db.ts:ensureTables"
+      ],
+      "checksum": "a706687299d2775acdbbe7db8c73cfe26b7748146a26cd765147971f45f802c9"
+    },
+    "REQ-SDK-STORAGE-REPO-001": {
+      "id": "REQ-SDK-STORAGE-REPO-001",
+      "description": "The system SHALL provide a database abstraction layer for managing memory and entity records.",
+      "acceptance_criteria": [
+        "The database abstraction layer SHALL support persistence of vector-embedded memory and entity records.",
+        "The database abstraction layer SHALL support retrieval of vector-embedded memory and entity records.",
+        "The database abstraction layer SHALL handle batch inserts.",
+        "The database abstraction layer SHALL manage table initialization.",
+        "The database abstraction layer SHALL support CRUD operations (Create, Read, Update, Delete).",
+        "The database abstraction layer SHALL manage serialization of metadata and entity associations."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:Repository"
+      ],
+      "checksum": "80f2ffd47291c8b8b80ffee26372182ecf30f2cc78cc04e4c35466e2fab59a64"
+    },
+    "REQ-SDK-STORAGE-REPO-002": {
+      "id": "REQ-SDK-STORAGE-REPO-002",
+      "description": "The system SHALL support batch saving of memories and entities.",
+      "acceptance_criteria": [
+        "When a batch of memories and entities is provided, the system SHALL ensure the necessary memory and entity tables exist, creating them if they do not.",
+        "The system SHALL persist all provided memories and entities.",
+        "If a memory or entity is missing a vector, the system SHALL assign a default vector."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:saveBatch"
+      ],
+      "checksum": "c6e62c6478143bdd4906af0d87cdec3e192df0e49494469cb30c96473b0fd782"
+    },
+    "REQ-SDK-STORAGE-REPO-003": {
+      "id": "REQ-SDK-STORAGE-REPO-003",
+      "description": "The system SHALL enable vector-based similarity search for memories.",
+      "acceptance_criteria": [
+        "When a search query is provided, the system SHALL perform a vector-based similarity search on the memory table.",
+        "The search SHALL utilize cosine distance for similarity calculation.",
+        "The search SHALL support optional SQL-like filtering.",
+        "The system SHALL parse stringified JSON fields within retrieved results into objects.",
+        "The system SHALL return a limited set of search results."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:searchMemories"
+      ],
+      "checksum": "f5ba3dedd2d73dfe3bee10a284ba6f5f8c1de428edaded80371dd0cf1994a74d"
+    },
+    "REQ-SDK-STORAGE-REPO-004": {
+      "id": "REQ-SDK-STORAGE-REPO-004",
+      "description": "The system SHALL allow retrieving a specified number of the most recent memories.",
+      "acceptance_criteria": [
+        "When a request for recent memories is made, the system SHALL verify the existence of the memory table.",
+        "If the memory table exists, the system SHALL retrieve the specified number of the most recent memory records.",
+        "The system SHALL correctly parse metadata and entity IDs from the retrieved records."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:getAll"
+      ],
+      "checksum": "dce1378667afb98b9cae9b4d863f2657aa24ce0dd7a6943480ea3b01d21437a9"
+    },
+    "REQ-SDK-STORAGE-REPO-005": {
+      "id": "REQ-SDK-STORAGE-REPO-005",
+      "description": "The system SHALL enable retrieval of a single memory by its unique identifier.",
+      "acceptance_criteria": [
+        "When a memory ID is provided, the system SHALL query the memory table for a matching record.",
+        "If a matching record is found, the system SHALL parse its associated metadata and entity IDs.",
+        "The system SHALL return the memory object if found.",
+        "If no matching record is found or the memory table does not exist, the system SHALL return null."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:getById"
+      ],
+      "checksum": "37e8e2d86a571bde588526c0fe8991d711d940bfc6c97ab523719d548bf119b3"
+    },
+    "REQ-SDK-STORAGE-REPO-006": {
+      "id": "REQ-SDK-STORAGE-REPO-006",
+      "description": "The system SHALL support deleting a memory by its unique identifier.",
+      "acceptance_criteria": [
+        "When a memory ID is provided for deletion, the system SHALL verify the existence of the memory table.",
+        "If the memory table exists and the memory is successfully deleted, the system SHALL return true.",
+        "If the memory table is not found, the system SHALL return false."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:deleteById"
+      ],
+      "checksum": "c62b60190d19eec73c822794b49c8cc67c904a6be461192bf90db7150f13f731"
+    },
+    "REQ-SDK-STORAGE-REPO-007": {
+      "id": "REQ-SDK-STORAGE-REPO-007",
+      "description": "The system SHALL support updating an existing memory's fields.",
+      "acceptance_criteria": [
+        "When update fields and a memory ID are provided, the system SHALL verify the existence of the memory table.",
+        "If the memory table exists, the system SHALL apply the provided updates to the memory matching the ID.",
+        "The system SHALL ensure proper escaping of string values during the update.",
+        "If the memory table does not exist, no update operation SHALL be performed."
+      ],
+      "node_ids": [
+        "packages/sdk/src/storage/repository.ts:updateMemory"
+      ],
+      "checksum": "f13a187e7d60ccbc4f1fc4e1798d39ba622e6cd283938e3d188a9ac39d287af1"
+    },
+    "REQ-MM-001": {
+      "id": "REQ-MM-001",
+      "description": "The system SHALL provide a mechanism to store and retrieve metadata associated with a memory, including project ID, user ID, source file, and arbitrary key-value pairs.",
+      "acceptance_criteria": [
+        "Memory metadata SHALL be retrievable for a given memory.",
+        "Memory metadata SHALL support storing a project ID.",
+        "Memory metadata SHALL support storing a user ID.",
+        "Memory metadata SHALL support storing a source file identifier.",
+        "Memory metadata SHALL allow storing additional arbitrary key-value pairs."
+      ],
+      "node_ids": [
+        "packages/sdk/src/types.ts:MemoryMetadata"
+      ],
+      "checksum": "c91aaf657d79a36b42b08d785b252dc4d82d59afbddfeaf78b726f6278cf9c34"
+    },
+    "REQ-ENT-001": {
+      "id": "REQ-ENT-001",
+      "description": "The system SHALL define an entity structure that includes an identifier, name, type, an optional description, and an optional vector representation.",
+      "acceptance_criteria": [
+        "An entity SHALL have a unique identifier.",
+        "An entity SHALL have a name.",
+        "An entity SHALL have a type.",
+        "An entity MAY have a description.",
+        "An entity MAY include a vector representation."
+      ],
+      "node_ids": [
+        "packages/sdk/src/types.ts:Entity"
+      ],
+      "checksum": "d1672a1d7ecb5b3fd599c344f83bc1c1665a822c806e29716b3e10f5fd977ea3"
+    },
+    "REQ-LLM-003": {
+      "id": "REQ-LLM-003",
+      "description": "If a requested LLM provider is not configured or cannot be found, the LLMFactory shall return a MockProvider and issue a warning.",
+      "acceptance_criteria": [
+        "The system returns a MockProvider as a fallback for unknown provider names.",
+        "The system issues a warning log when a fallback occurs.",
+        "The system prevents application failure when a specific provider is unavailable."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/factory.ts:getProvider"
+      ],
+      "checksum": "97bfe92c0154cef6054929ac3946df45323981e70aee25ee2699cfc18c52b4ee"
+    },
+    "REQ-LOGGER-INFO-001": {
+      "id": "REQ-LOGGER-INFO-001",
+      "description": "When the logger's debug mode is enabled, the system shall log informational messages, prefixed with 'INFO:' in blue.",
+      "acceptance_criteria": [
+        "Given the logger's debug mode is enabled, when an informational message is provided, then the message shall be displayed on the console.",
+        "Given the logger's debug mode is enabled, when an informational message is provided, then the displayed message shall be prefixed with 'INFO:'.",
+        "Given the logger's debug mode is enabled, when an informational message is provided, then the 'INFO:' prefix shall be displayed in blue.",
+        "Given the logger's debug mode is disabled, when an informational message is provided, then no message shall be displayed on the console related to this log."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/logger.ts:info"
+      ],
+      "checksum": "c274a4307d6e3178bbff28deffa840bdb8d2cc1aba62b66c85119b7ea616f9aa"
+    },
+    "REQ-LOGGER-WARN-001": {
+      "id": "REQ-LOGGER-WARN-001",
+      "description": "When the logger's debug mode is enabled, the system shall log warning messages, prefixed with 'WARN:' in yellow.",
+      "acceptance_criteria": [
+        "Given the logger's debug mode is enabled, when a warning message is provided, then the message shall be displayed on the console.",
+        "Given the logger's debug mode is enabled, when a warning message is provided, then the displayed message shall be prefixed with 'WARN:'.",
+        "Given the logger's debug mode is enabled, when a warning message is provided, then the 'WARN:' prefix shall be displayed in yellow.",
+        "Given the logger's debug mode is disabled, when a warning message is provided, then no message shall be displayed on the console related to this log."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/logger.ts:warn"
+      ],
+      "checksum": "1f03674d958107a10f76b55793bb1b7fccef6b7a758ca50c8ce63472b41c43e7"
+    },
+    "REQ-LOGGER-SUCCESS-001": {
+      "id": "REQ-LOGGER-SUCCESS-001",
+      "description": "The system shall always log success messages to the console, regardless of the logger's debug mode.",
+      "acceptance_criteria": [
+        "Given the logger's debug mode is enabled, when a success message is provided, then the message shall be displayed on the console.",
+        "Given the logger's debug mode is disabled, when a success message is provided, then the message shall be displayed on the console.",
+        "When a success message is displayed, then it shall indicate a successful operation."
+      ],
+      "node_ids": [
+        "packages/cli/src/lib/logger.ts:success"
+      ],
+      "checksum": "a913ea4eb4c29f0e0146804bd1d6a4026fc1e743b44fefed9f4d27aa170e8628"
+    },
+    "REQ-MOCK-PROVIDER-001": {
+      "id": "REQ-MOCK-PROVIDER-001",
+      "description": "The mock LLM provider shall implement the 'ILLMProvider' interface to simulate a Language Model for testing and development purposes.",
+      "acceptance_criteria": [
+        "The 'MockProvider' class shall fulfill the contract defined by the 'ILLMProvider' interface.",
+        "When simulating text generation, the 'MockProvider' shall provide predefined or heuristically determined responses.",
+        "When simulating embedding generation, the 'MockProvider' shall return random vector values."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/mock.ts:MockProvider",
+        "packages/sdk/src/ai/types.ts:ILLMProvider"
+      ],
+      "checksum": "6fcf37022ebda7fdd9b4b96b6dc2a8266bd3446b528b8b4161aa430f1a8b90fb"
+    },
+    "REQ-MOCK-GENERATE-001": {
+      "id": "REQ-MOCK-GENERATE-001",
+      "description": "The mock LLM provider shall generate mock text responses for 'LLMRequest's, returning valid JSON format when the prompt suggests a JSON structure is expected, and an 'LLMResponse'.",
+      "acceptance_criteria": [
+        "Given an 'LLMRequest' is provided, when the 'generate' method of the mock provider is called, then an 'LLMResponse' shall be returned.",
+        "Given the 'LLMRequest' prompt suggests a JSON response (e.g., contains 'JSON' or 'json'), when the 'generate' method is called, then the 'LLMResponse' text shall be valid JSON."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/mock.ts:generate",
+        "packages/sdk/src/ai/providers/mock.ts:MockProvider",
+        "packages/sdk/src/ai/types.ts:LLMRequest",
+        "packages/sdk/src/ai/types.ts:LLMResponse"
+      ],
+      "checksum": "f3146e0dd2c97053e5943c46f5a92be84ae9df1f3d4b6a8ab9d4e17307853530"
+    },
+    "REQ-MOCK-EMBED-001": {
+      "id": "REQ-MOCK-EMBED-001",
+      "description": "The mock LLM provider shall generate mock embedding vectors of a fixed dimension (1536) with random values.",
+      "acceptance_criteria": [
+        "When the 'embed' method of the mock provider is called, then an embedding vector shall be returned.",
+        "When the 'embed' method is called, then the returned embedding vector shall have a dimension of 1536.",
+        "When the 'embed' method is called, then the values within the returned embedding vector shall be random."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/providers/mock.ts:embed",
+        "packages/sdk/src/ai/providers/mock.ts:MockProvider"
+      ],
+      "checksum": "9a203d25e481ab4f1dfc3a728779d8f458550427f45269c9e6b4695f6a419645"
+    },
+    "REQ-LLM-REQUEST-001": {
+      "id": "REQ-LLM-REQUEST-001",
+      "description": "The system shall define a structured 'LLMRequest' for Language Model interactions, which includes a main prompt and an optional system instruction.",
+      "acceptance_criteria": [
+        "The 'LLMRequest' structure shall mandate a 'prompt' field of type string.",
+        "The 'LLMRequest' structure shall allow an optional 'system' instruction field of type string.",
+        "Any 'ILLMProvider' consuming an 'LLMRequest' shall correctly parse its structure."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/types.ts:LLMRequest",
+        "packages/sdk/src/ai/types.ts:ILLMProvider"
+      ],
+      "checksum": "eb54d41f7846479c4ece9fe169c98b018ff9554386132232d59c0d335fbec1ef"
+    },
+    "REQ-LLM-RESPONSE-001": {
+      "id": "REQ-LLM-RESPONSE-001",
+      "description": "The system shall define a structured 'LLMResponse' for Language Model outcomes, containing the generated text and optional token usage information.",
+      "acceptance_criteria": [
+        "The 'LLMResponse' structure shall mandate a 'text' field of type string, representing the generated content.",
+        "The 'LLMResponse' structure shall allow an optional 'usage' field, detailing token consumption.",
+        "Any 'ILLMProvider' producing an 'LLMResponse' shall correctly format its output according to this structure."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/types.ts:LLMResponse",
+        "packages/sdk/src/ai/types.ts:ILLMProvider"
+      ],
+      "checksum": "168eb2c961ed28c3ec990c2b48a023b592127e07c0472ca2c6a5b595ba06bb2b"
+    },
+    "REQ-LLM-PROVIDER-INTERFACE-001": {
+      "id": "REQ-LLM-PROVIDER-INTERFACE-001",
+      "description": "The system shall define the 'ILLMProvider' interface, which specifies the contract for Language Model providers, requiring methods for text generation and embedding.",
+      "acceptance_criteria": [
+        "Any implementation of 'ILLMProvider' shall define a 'generate' method that accepts an 'LLMRequest' and returns an 'LLMResponse'.",
+        "Any implementation of 'ILLMProvider' shall define an 'embed' method that accepts an array of strings and returns an array of numbers (embeddings).",
+        "The 'MockProvider' shall adhere to this 'ILLMProvider' interface."
+      ],
+      "node_ids": [
+        "packages/sdk/src/ai/types.ts:ILLMProvider",
+        "packages/sdk/src/ai/types.ts:LLMRequest",
+        "packages/sdk/src/ai/types.ts:LLMResponse",
+        "packages/sdk/src/ai/providers/mock.ts:MockProvider"
+      ],
+      "checksum": "a335c5dc24f3da69cbd636b948452b58cfba1dc8b8ccaa971b395dd3e06773ef"
     }
   }
 }
