@@ -8,7 +8,12 @@ import { logger } from "../lib/logger";
 export const queryCommand = new Command("query")
   .description("Search memories")
   .argument("<phrase>", "Search query")
-  .option("-e, --entity <name>", "Boost results related to this entity")
+  .option(
+    "-e, --entity <name>",
+    "Boost results related to this entity (can be repeated)",
+    (val, memo: string[]) => memo.concat(val),
+    [],
+  )
   .option("-p, --project <project>", "Filter by project")
   .option("-u, --userid <userid>", "Filter by user")
   .option("--json", "Output results as JSON")

@@ -1,6 +1,7 @@
 import { Repository } from "../storage/repository";
 import { LLMFactory } from "../ai/factory";
 import { Config } from "../config/schema";
+import { getDb } from "../storage/db";
 
 export interface SearchResult {
   memoryId: string;
@@ -22,7 +23,7 @@ export class SearchEngine {
   async search(
     phrase: string,
     filters: any = {},
-    boostEntity?: string,
+    boostEntity?: string | string[],
   ): Promise<SearchResult[]> {
     // 1. Embed query (prioritize 'local' for consistent dimension with stored data)
     const embedderName = this.config.providers["local"]
@@ -31,29 +32,30 @@ export class SearchEngine {
     const embedder = this.llmFactory.getProvider(embedderName);
     const vector = await embedder.embed(phrase);
 
-    // 2. Build Filter String for LanceDB (SQL-like)
-    // e.g. "metadata.project = 'main'"
-    // Since metadata is stored as JSON string in 'metadata' column,
-    // LanceDB might need string matching or if we stored it as struct.
-    // In schema.ts we used `new Field('metadata', new Utf8())`.
-    // So we can't easily query JSON fields with SQL in current LanceDB Node unless we used struct.
-    // For now, we might have to do post-filtering if metadata is a string.
-    // OR we change schema to use Struct if possible, but let's stick to post-filtering for MVP safety.
-
     // 3. Vector Search
     // We request more results to allow for post-filtering
     const rawResults = await this.repo.searchMemories(vector, undefined, 50);
 
     // 4. Post-Process (Filter & Boost)
-    let results: SearchResult[] = rawResults.map((r: any) => ({
-      memoryId: r.id,
-      content: r.content,
-      score: 1 - (r._distance || 0), // LanceDB returns distance usually, we want similarity/score
-      type: r.type,
-      metadata:
-        typeof r.metadata === "string" ? JSON.parse(r.metadata) : r.metadata,
-      entityIds: r.entityIds,
-    }));
+    let results: SearchResult[] = rawResults.map((r: any) => {
+      // LanceDB 'cosine' metric returns cosine distance: 1 - cosine_similarity
+      // similarity = 1 - distance
+      // Distance is usually in [0, 2], so similarity is in [-1, 1]
+      const similarity = 1 - (r._distance || 0);
+
+      // Normalize to [0, 1] for better UX
+      const normalizedScore = (similarity + 1) / 2;
+
+      return {
+        memoryId: r.id,
+        content: r.content,
+        score: normalizedScore,
+        type: r.type,
+        metadata:
+          typeof r.metadata === "string" ? JSON.parse(r.metadata) : r.metadata,
+        entityIds: r.entityIds,
+      };
+    });
 
     // Filter
     if (Object.keys(filters).length > 0) {
@@ -66,14 +68,45 @@ export class SearchEngine {
     }
 
     // Boost by Entity
-    // This assumes we found the entity ID for the name 'boostEntity'.
-    // For MVP, we might skip resolving the name to ID and just check if the name appears?
-    // No, the requirements said "Entity graph relationships".
-    // Realistically, we'd need to search the Entity table for `boostEntity`, get its ID,
-    // and then boost memories containing that ID.
     if (boostEntity) {
-      // TODO: Implement entity lookup. For now, we skip or naive check.
-      // We'll leave this as a placeholder for the agent to expand.
+      const entitiesToBoost = Array.isArray(boostEntity)
+        ? boostEntity
+        : [boostEntity];
+
+      try {
+        const dbConn = await getDb();
+        const tableNames = await dbConn.tableNames();
+
+        if (tableNames.includes("entities")) {
+          const entityTable = await dbConn.openTable("entities");
+          const boostIds = new Set<string>();
+
+          for (const name of entitiesToBoost) {
+            const matches = await entityTable
+              .query()
+              .where(`name = '${name.replace(/'/g, "''")}'`)
+              .limit(1)
+              .toArray();
+            if (matches.length > 0) {
+              boostIds.add(matches[0].id);
+            }
+          }
+
+          if (boostIds.size > 0) {
+            results = results.map((r: any) => {
+              const hasBoostedEntity = r.entityIds?.some((id: string) =>
+                boostIds.has(id),
+              );
+              if (hasBoostedEntity) {
+                return { ...r, score: r.score * 1.2 };
+              }
+              return r;
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Boosting failed:", e);
+      }
     }
 
     // Sort by score

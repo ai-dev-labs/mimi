@@ -39,7 +39,7 @@ describe("SearchEngine", () => {
 
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].memoryId).toBe("1");
-    expect(results[0].score).toBeCloseTo(0.9);
+    expect(results[0].score).toBeCloseTo(0.95);
   });
 
   it("should filter results by metadata", async () => {

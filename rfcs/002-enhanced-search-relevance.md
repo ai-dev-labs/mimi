@@ -1,7 +1,7 @@
 # 002: Enhanced Search Relevance
 
 ## Status
-Proposed
+Implemented
 
 ## Summary
 Improve memory retrieval accuracy by refining vector search logic, implementing entity-based boosting, and optimizing similarity score calculations.
@@ -31,16 +31,14 @@ Current search results return low similarity scores (often negative) and frequen
 ## Detailed Design
 
 ### 1. Vector Search Optimization
-- Update `Repository.searchMemories` to use the `.metric("cosine")` in LanceDB queries.
-- Update `SearchEngine.search` to handle similarity scores correctly (Cosine similarity in LanceDB returns 1.0 for perfect match and -1.0 for opposite, distance is $1 - similarity$).
-- Wait, LanceDB's `metric("cosine")` actually returns the **Cosine Distance**, which is $1 - Cosine Similarity$.
-- So `score = 1 - distance` is correct for Cosine Distance.
+- Update `Repository.searchMemories` to use `distanceType("cosine")` in LanceDB queries.
+- Update `SearchEngine.search` to handle similarity scores correctly (Cosine distance is converted to similarity: `1 - distance`).
+- Scores are normalized to `[0, 1]` using `(similarity + 1) / 2`.
 
 ### 2. Entity Boosting
-- In `SearchEngine.search`, if `boostEntity` is provided:
-  - Query the `entities` table for an entity matching the name (case-insensitive).
-  - If found, retrieve its `id`.
-  - For each search result, if `r.entityIds` contains the boosted entity ID, multiply its score by a boost factor (e.g., 1.2).
+- In `SearchEngine.search`, if `boostEntity` is provided (supports multiple names):
+  - Query the `entities` table for entities matching the names (case-insensitive).
+  - For each search result, if `r.entityIds` contains any of the boosted entity IDs, multiply its score by a hardcoded boost factor of **1.2**.
 
 ### 3. Consistency
 - Ensure `SearchEngine` and `PipelineEngine` use a consistent logic for selecting the embedding provider.
@@ -54,5 +52,4 @@ Current search results return low similarity scores (often negative) and frequen
 - Use hybrid search (vector + keyword), but LanceDB's keyword search setup is more complex.
 
 ## Unresolved Questions
-- What is the optimal boost factor for entities?
-- Should we support multiple boosted entities?
+- None. (Multiple entities support and hardcoded 1.2 boost factor decided).

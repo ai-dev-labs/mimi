@@ -67,7 +67,7 @@ export class Repository {
     if (!tableNames.includes(MEMORY_TABLE)) return [];
 
     const table = await db.openTable(MEMORY_TABLE);
-    let query = table.search(vector).limit(limit);
+    let query = (table.search(vector) as any).distanceType("cosine").limit(limit);
 
     // Note: LanceDB filter syntax is SQL-like.
     // We'd need to parse our metadata filter into SQL if provided.
@@ -77,7 +77,7 @@ export class Repository {
     }
 
     const results = await query.toArray();
-    return results.map((m) => {
+    return results.map((m: any) => {
       if (typeof m.metadata === "string") m.metadata = JSON.parse(m.metadata);
       if (typeof m.entityIds === "string")
         m.entityIds = JSON.parse(m.entityIds);
@@ -93,7 +93,7 @@ export class Repository {
     const table = await db.openTable(MEMORY_TABLE);
     // Return most recent first
     const results = await table.query().limit(limit).toArray();
-    return results.map((m) => {
+    return results.map((m: any) => {
       if (typeof m.metadata === "string") m.metadata = JSON.parse(m.metadata);
       if (typeof m.entityIds === "string")
         m.entityIds = JSON.parse(m.entityIds);
